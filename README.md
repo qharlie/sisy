@@ -7,12 +7,12 @@ Install sisy:
 ```
 pip install pysisy==0.1
 ```
-You'll want to have tensorflow and keras already setup, this assumes that you do.
+You'll want to have tensorflow and keras already setup, the rest of this readme assumes that you do.
 
 
 ## Examples
 
-The  [examples/](https://github.com/qorrect/sisy/examples/) directory tries to mimic https://github.com/fchollet/keras/blob/master/examples/ with added parameter searches.
+The  [examples/](https://github.com/qorrect/sisy/tree/master/examples) directory tries to mimic https://github.com/fchollet/keras/blob/master/examples/ with added parameter searches.
 
 A minimal example showing searching a variable number of units
 
