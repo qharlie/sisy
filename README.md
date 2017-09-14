@@ -3,16 +3,12 @@
 
 Using Minos to search for neural networks architecture & hyper parameters with genetic algorithms.  Comes with a nice UI and easy syntax.
 
-
-
-## Getting Started
-
-You'll want to have tensorflow and keras already setup, this assumes that you do.
-
 Install sisy:
 ```
 pip install pysisy==0.1
 ```
+You'll want to have tensorflow and keras already setup, this assumes that you do.
+
 
 ## Examples
 
