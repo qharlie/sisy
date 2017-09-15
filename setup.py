@@ -3,12 +3,12 @@ from setuptools import setup
 
 
 setup(name='pysisy',
-      version='0.1',
+      version='0.12',
       description='Graphical UI and training shorthand for neural nets hyper parameters & architecture search with genetic algorithms',
       keywords=['keras', 'genetic algorithm', 'neural network', 'deep learning'],
-      author='Charlie Sanders originally Julien Roch',
+      author='Charlie Sanders',
       author_email='charlie.fats@gmail.com',
-      url='https://github.com/qorrect/minos',
+      url='https://github.com/qorrect/sisy',
       license='Apache',
       setup_requires=[
           'numpy>=1.12'],
