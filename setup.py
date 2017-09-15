@@ -3,7 +3,7 @@ from setuptools import setup
 
 
 setup(name='pysisy',
-      version='0.12',
+      version='0.13',
       description='Graphical UI and training shorthand for neural nets hyper parameters & architecture search with genetic algorithms',
       keywords=['keras', 'genetic algorithm', 'neural network', 'deep learning'],
       author='Charlie Sanders',

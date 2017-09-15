@@ -3,7 +3,7 @@
 
 #### Install sisy:
  ```
- pip install pysisy==0.12
+ pip install pysisy==0.13
  ```
 
 
@@ -17,13 +17,15 @@ The  [examples](https://github.com/qorrect/sisy/tree/master/examples) directory 
 This is based on [reuters_mlp.py](https://github.com/fchollet/keras/blob/master/examples/reuters_mlp.py) from keras examples.
 
 ```python
-layout = [('Input', {'units': max_words}),
+          # Our Input size is the number of words in our reuters data we want to examine
+layout = [('Input', {'units': 10000}),
           # 'units' we specify a range of nodes we want to try
           # 'activation' we specify a list of the activation types we want to try
           ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
           # 'rate' is a f(loat)range from 0.2 to 0.8 , forced into a list
           ('Dropout', {'rate': list(frange(0.2,0.8))}),
-          ('Output', {'units': num_classes, 'activation': 'softmax'})]
+          # Our Output size is the number of categories we want to classify the article into
+          ('Output', {'units': 42, 'activation': 'softmax'})]
 
 run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_test),
                     optimizer='adam',
@@ -45,7 +47,13 @@ run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_t
 
 ```
 
-Which will produce log files which you can use the UI to view.
+Which will produce log files that are viewable with the UI.
+
+```python
+python -m sisy
+```
+
+Will open Sisy log viewer in your browser
 
 ![Alt text](ui/assets/s1.png "Optional title")
 

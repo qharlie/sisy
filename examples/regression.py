@@ -16,6 +16,7 @@ run_sisy_experiment(layout,
                     metric='mean_squared_error',
                     optimizer='Adam',
                     n_jobs=8,
-                    epochs=50,
-                    batch_size=1,
-                    mutation=10)
+                    epochs=25,
+                    batch_size=2,
+                    generations=10)
+

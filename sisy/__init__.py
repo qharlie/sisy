@@ -1,17 +1,12 @@
-from collections import defaultdict
-from copy import deepcopy
+def ui():
+    import os
+    import webbrowser
+    path  = os.path.realpath(os.path.dirname(__file__) + "/../ui/index.html" )
+    webbrowser.open_new_tab(path)
 
-from keras.datasets import boston_housing
-from keras.layers import Dense, Dropout
 
-from minos.experiment.experiment import Experiment, ExperimentSettings
-from minos.experiment.ga import run_ga_search_experiment
-from minos.experiment.training import Training, EpochStoppingCondition
-from minos.model.model import Layout, Objective, Optimizer, Metric
-from minos.model.parameter import int_param, string_param, float_param
-from minos.model.parameters import register_custom_layer, reference_parameters
-from minos.train.utils import SimpleBatchIterator, GpuEnvironment
-from minos.experiment.experiment import ExperimentParameters
+if __name__ == "__main__":
+    ui()
 
 def frange(x, y, jump=0.1):
   while x < y:
@@ -45,6 +40,22 @@ def run_sisy_experiment(sisy_layout : list,
                         fitness_type='FitnessMax',
                         shuffle=True):
 
+
+
+    from collections import defaultdict
+    from copy import deepcopy
+
+    from keras.datasets import boston_housing
+    from keras.layers import Dense, Dropout
+
+    from minos.experiment.experiment import Experiment, ExperimentSettings
+    from minos.experiment.ga import run_ga_search_experiment
+    from minos.experiment.training import Training, EpochStoppingCondition
+    from minos.model.model import Layout, Objective, Optimizer, Metric
+    from minos.model.parameter import int_param, string_param, float_param
+    from minos.model.parameters import register_custom_layer, reference_parameters
+    from minos.train.utils import SimpleBatchIterator, GpuEnvironment
+    from minos.experiment.experiment import ExperimentParameters
 
     if len(sisy_layout) < 2:
         print("Sisy Layout must be at least size 2, an output, middle, and output layer")
@@ -215,4 +226,5 @@ def run_sisy_experiment(sisy_layout : list,
        experiment,
        resume=False,
        log_level='DEBUG')
+
 
