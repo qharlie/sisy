@@ -3,18 +3,15 @@ on the Reuters newswire topic classification task.
 '''
 from __future__ import print_function
 
+
 import numpy as np
 import keras
 from keras.datasets import reuters
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
 from keras.preprocessing.text import Tokenizer
 
-from api import run_sisy_experiment
+from api import run_sisy_experiment, frange
 
 max_words = 1000
-# batch_size = 32
-# epochs = 5
 
 (x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=max_words,
                                                          test_split=0.2)
@@ -27,11 +24,41 @@ x_test = tokenizer.sequences_to_matrix(x_test, mode='binary')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
+# ######################
+#
+# Compare with https://github.com/fchollet/keras/blob/master/examples/reuters_mlp.py
+#
+# Here is the original keras layout
+#
+# model = Sequential()
+# model.add(Dense(512, input_shape=(max_words,)))
+# model.add(Activation('relu'))
+# model.add(Dropout(0.5))
+# model.add(Dense(num_classes))
+# model.add(Activation('softmax'))
+#
+# ######################
 layout = [('Input', {'units': max_words}),
-          ('Dense', {'units': range(400, 600), 'activation': 'relu'}),
-          ('Dropout', {'rate': 0.5}),
+          # 'units' we specify a range of nodes we want to try
+          # 'activation' we specify a list of the activation types we want to try
+          ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
+          # 'rate' is a f(loat)range from 0.2 to 0.8 , sorry we have to force into a list generator objects 'are not picklable'
+          ('Dropout', {'rate': list(frange(0.2,0.8))}),
           ('Output', {'units': num_classes, 'activation': 'softmax'})]
 
-run_sisy_experiment(layout, 'reuters_mlp', (x_train, y_train), (x_test, y_test),
-                    epochs=5, batch_size=32, population_size=10, n_jobs=8,
-                    loss='categorical_crossentropy', optimizer='adam', metric='acc', shuffle=False)
+run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_test),
+                    optimizer='adam',
+                    metric='acc',
+                    epochs=10,
+                    batch_size=32,
+                    n_jobs=8,
+                    # 'devices' : Lets run this on my dual 980ti GPUs
+                    devices=['/gpu:0','/gpu:1'],
+                    # 'population_size' : The number of different blueprints to try per generation.
+                    population_size=10,
+                    # 'generations' : The number of times to evolve the generations ( evolving here means taking the best blueprints
+                    # and combining them to create ${population_size} more new blueprints)
+                    generations=10,
+                    loss='categorical_crossentropy',
+                    # 'shuffle' : Defaults to true
+                    shuffle=False)

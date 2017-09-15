@@ -1,21 +1,30 @@
+from collections import defaultdict
 from copy import deepcopy
 
 from keras.datasets import boston_housing
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 
 from minos.experiment.experiment import Experiment, ExperimentSettings
 from minos.experiment.ga import run_ga_search_experiment
 from minos.experiment.training import Training, EpochStoppingCondition
 from minos.model.model import Layout, Objective, Optimizer, Metric
-from minos.model.parameter import int_param
+from minos.model.parameter import int_param, string_param, float_param
 from minos.model.parameters import register_custom_layer, reference_parameters
 from minos.train.utils import SimpleBatchIterator, GpuEnvironment
 from minos.experiment.experiment import ExperimentParameters
 
-def default(x,d):
-    if x:
-        return x
-    return d
+def frange(x, y, jump=0.1):
+  while x < y:
+    yield x
+    x += jump
+
+class SisyLayerParams(object):
+
+    def __init__(self):
+        self.units = []
+        self.activation = []
+        self.rate = []
+
 
 def run_sisy_experiment(sisy_layout : list,
                         experiment_label : str,
@@ -69,13 +78,13 @@ def run_sisy_experiment(sisy_layout : list,
             print("You must specify the parameter 'units' for the Input layer");
             return;
 
-    output_activation = default(output[1]['activation'],'categorical_crossentropy')
+    output_activation = output[1]['activation']
     output_initializer = 'normal'
     if 'kernel_initializer' in output[1]:
         output_initializer = output[1]['kernel_initializer']
 
     output_size = output[1]['units']
-    input_size = default(input[1]['units'],X_train.shape[1])
+    input_size = input[1]['units']
 
 
     batch_iterator = SimpleBatchIterator(X_train, y_train, batch_size=batch_size, autoloop=autoloop, preload=True, shuffle=shuffle)
@@ -93,28 +102,52 @@ def run_sisy_experiment(sisy_layout : list,
 
 
 
+
+    parameters = defaultdict(SisyLayerParams)
+
+
     blocks = []
-    units_list = []
+
     for i,e in enumerate(sisy_layout[1:-1]):
         block = ()
-        if e[0] in ['Dense']:
+        layer_name = e[0]
+        layer = deepcopy(e[1])
+        if layer_name == 'Dense':
             key = f'Dense{i}'
-            print("Registering {}".format(key))
             register_custom_layer(
                    key,
                    Dense,
                    deepcopy(reference_parameters['layers']['Dense']),
                    True)
-            layer = deepcopy(e[1])
-            units_list.append( layer['units'] )
+            parameters[key].units = layer['units']
             del layer['units']
+            if 'activation' in layer:
+                if type(layer['activation']) == list:
+                    parameters[key].activation = layer['activation']
+                    del layer['activation']
             block  =  (key, layer)
+        elif layer_name == 'Dropout':
+            key = f'Dropout{i}'
+            if 'rate' in layer:
+                if type(layer['rate']) == float:
+                    pass
+                else:
+                    register_custom_layer(
+                                       key,
+                                       Dropout,
+                                       deepcopy(reference_parameters['layers']['Dropout']),
+                                       True)
+                    parameters[key].rate = layer['rate']
+                    del layer['rate']
+            block  =  (key, layer)
+
+
         else:
             block = e
         blocks.append(block )
 
 
-    print(blocks)
+
     layout = Layout(
        input_size,  # Input size, 13 features I think
        output_size ,  # Output size, we want just the price
@@ -132,13 +165,31 @@ def run_sisy_experiment(sisy_layout : list,
     experiment_parameters.layout_parameter('blocks', 1)
     experiment_parameters.layout_parameter('layers', 1)
 
+    for key in parameters.keys():
+        layer = parameters[key]
+        if len(layer.activation):
+            experiment_parameters.layer_parameter(f'{key}.activation', string_param(layer.activation))
 
-    for i,units in enumerate(units_list):
-        key = f'Dense{i}.units'
+        units = layer.units
         if type(units) == int:
-            experiment_parameters.layer_parameter(key, units)
-        else:
-            experiment_parameters.layer_parameter(key, int_param(units[0], units[-1]))
+            experiment_parameters.layer_parameter(f'{key}.units', units)
+        elif type(units) == list and len(units):
+            experiment_parameters.layer_parameter(f'{key}.units', int_param(units[0], units[-1]))
+
+        rate = layer.rate
+        if type(rate) == list and len(rate):
+            print(len(rate))
+            experiment_parameters.layer_parameter(f'{key}.rate', float_param(rate[0], rate[-1]))
+
+
+
+    #
+    # for i,units in enumerate(units_list):
+    #     key = f'Dense{i}.units'
+    #     if type(units) == int:
+    #         experiment_parameters.layer_parameter(key, units)
+    #     else:
+    #         experiment_parameters.layer_parameter(key, int_param(units[0], units[-1]))
 
 
 

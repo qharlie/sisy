@@ -1,29 +1,50 @@
-# Sisyphus
+# Sisy<sub><sup>phus</sup></sub>
+
+A front end for [Minos](https://github.com/guybedo/minos)
 
 
-Using Minos to search for neural networks architecture & hyper parameters with genetic algorithms.  Comes with a nice UI and easy syntax.
-
-Install sisy:
-```
-pip install pysisy==0.1
-```
-You'll want to have tensorflow and keras already setup, the rest of this readme assumes that you do.
-
+<!-- Install sisy: -->
+<!-- ``` -->
+<!-- pip install pysisy==0.1 -->
+<!-- ``` -->
 
 ## Examples
 
 The  [examples/](https://github.com/qorrect/sisy/tree/master/examples) directory tries to mimic https://github.com/fchollet/keras/blob/master/examples/ with added parameter searches.
 
-A minimal example showing searching a variable number of units
+This is based on [reuters_mlp.py](https://github.com/fchollet/keras/blob/master/examples/reuters_mlp.py) from keras examples.
 
 ```python
-layout = [('Input',   {'units': 1000}),
-          ('Dense',   {'units': range(200, 600), 'activation': 'relu'}),
-          ('Dropout', {'rate': 0.5}),
-          ('Output',  {'units': 1, 'activation': 'softmax'})]
 
-run_sisy_experiment(layout, 'reuters_mlp', (x_train, y_train), (x_test, y_test),
-                    epochs=5, batch_size=32, population_size=10, n_jobs=8,
-                    loss='categorical_crossentropy', optimizer='adam', metric='acc', shuffle=False)
+layout = [('Input', {'units': max_words}),
+          # 'units' we specify a range of nodes we want to try
+          # 'activation' we specify a list of the activation types we want to try
+          ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
+          # 'rate' is a f(loat)range from 0.2 to 0.8 , sorry we have to force into a list generator objects 'are not picklable'
+          ('Dropout', {'rate': list(frange(0.2,0.8))}),
+          ('Output', {'units': num_classes, 'activation': 'softmax'})]
+
+run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_test),
+                    optimizer='adam',
+                    metric='acc',
+                    epochs=10,
+                    batch_size=32,
+                    n_jobs=8,
+                    # 'devices' : Lets run this on my dual 980ti GPUs
+                    devices=['/gpu:0','/gpu:1'],
+                    # 'population_size' : The number of different blueprints to try per generation.
+                    population_size=10,
+                    # 'generations' : The number of times to evolve the generations ( evolving here means taking the best blueprints
+                    # and combining them to create ${population_size} more new blueprints)
+                    generations=10,
+                    loss='categorical_crossentropy',
+                    # 'shuffle' : Defaults to true
+                    shuffle=False)
 
 ```
+
+Which will produce log files which you can use the UI to view.
+
+![Alt text](ui/assets/s1.png "Optional title")
+
+![Alt text](ui/assets/s3.png "Optional title")
