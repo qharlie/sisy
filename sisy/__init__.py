@@ -1,47 +1,45 @@
 def ui():
     import os
     import webbrowser
-    path  = os.path.realpath(os.path.dirname(__file__) + "/../ui/index.html" )
+    path = os.path.realpath(os.path.dirname(__file__) + "/../ui/index.html")
     webbrowser.open_new_tab(path)
 
 
 if __name__ == "__main__":
     ui()
 
+
 def frange(x, y, jump=0.1):
-  while x < y:
-    yield x
-    x += jump
+    while x < y:
+        yield x
+        x += jump
+
 
 class SisyLayerParams(object):
-
     def __init__(self):
         self.units = []
         self.activation = []
         self.rate = []
 
 
-def run_sisy_experiment(sisy_layout : list,
-                        experiment_label : str,
-                        XYTrainTuple : tuple,
-                        XYTestTuple : tuple,
+def run_sisy_experiment(sisy_layout: list,
+                        experiment_label: str,
+                        XYTrainTuple: tuple,
+                        XYTestTuple: tuple,
                         generations=10,
                         batch_size=1,
                         autoloop=True,
                         population_size=25,
                         epochs=50,
-                        devices =['/gpu:0','/gpu:1'],
-                        n_jobs = 1,
-                        optimizer = 'sgd',
-                        loss = 'categorical_crossentropy',
+                        devices=['/gpu:0', '/gpu:1'],
+                        n_jobs=1,
+                        optimizer='sgd',
+                        loss='categorical_crossentropy',
                         metric='acc',
-                        offspring = 1,
-                        mutation = 1,
+                        offspring=1,
+                        mutation=1,
                         fitness_type='FitnessMax',
                         shuffle=True):
-
-
-
     from collections import defaultdict
     from copy import deepcopy
 
@@ -68,26 +66,24 @@ def run_sisy_experiment(sisy_layout : list,
         print("XYTrainTuple must be a tuple of length 2, (X_train,y_train) ")
         return;
 
-
     X_train = XYTrainTuple[0]
     y_train = XYTrainTuple[1]
 
     X_test = XYTestTuple[0]
-    y_test  = XYTestTuple[1]
+    y_test = XYTestTuple[1]
 
-    input =sisy_layout[0]
+    input = sisy_layout[0]
     output = sisy_layout[-1]
-
 
     if 'activation' not in output[1]:
         print("You must specify the parameter 'activation' for the Output layer");
         return;
     if 'units' not in output[1]:
-            print("You must specify the parameter 'units' for the Output layer");
-            return;
+        print("You must specify the parameter 'units' for the Output layer");
+        return;
     if 'units' not in input[1]:
-            print("You must specify the parameter 'units' for the Input layer");
-            return;
+        print("You must specify the parameter 'units' for the Input layer");
+        return;
 
     output_activation = output[1]['activation']
     output_initializer = 'normal'
@@ -97,46 +93,42 @@ def run_sisy_experiment(sisy_layout : list,
     output_size = output[1]['units']
     input_size = input[1]['units']
 
-
-    batch_iterator = SimpleBatchIterator(X_train, y_train, batch_size=batch_size, autoloop=autoloop, preload=True, shuffle=shuffle)
-    test_batch_iterator = SimpleBatchIterator(X_test, y_test, batch_size=batch_size, autoloop=autoloop, preload=True, shuffle=shuffle)
+    batch_iterator = SimpleBatchIterator(X_train, y_train, batch_size=batch_size, autoloop=autoloop, preload=True,
+                                         shuffle=shuffle)
+    test_batch_iterator = SimpleBatchIterator(X_test, y_test, batch_size=batch_size, autoloop=autoloop, preload=True,
+                                              shuffle=shuffle)
 
     # our training , MSE for the loss and metric, stopping condition of 5 since our epochs are only 10
 
     training = Training(
-       Objective(loss),
-       Optimizer(optimizer=optimizer),
-       Metric(metric),
-       EpochStoppingCondition(epochs),
-       1)
-
-
-
-
+        Objective(loss),
+        Optimizer(optimizer=optimizer),
+        Metric(metric),
+        EpochStoppingCondition(epochs),
+        1)
 
     parameters = defaultdict(SisyLayerParams)
 
-
     blocks = []
 
-    for i,e in enumerate(sisy_layout[1:-1]):
+    for i, e in enumerate(sisy_layout[1:-1]):
         block = ()
         layer_name = e[0]
         layer = deepcopy(e[1])
         if layer_name == 'Dense':
             key = f'Dense{i}'
             register_custom_layer(
-                   key,
-                   Dense,
-                   deepcopy(reference_parameters['layers']['Dense']),
-                   True)
+                key,
+                Dense,
+                deepcopy(reference_parameters['layers']['Dense']),
+                True)
             parameters[key].units = layer['units']
             del layer['units']
             if 'activation' in layer:
                 if type(layer['activation']) == list:
                     parameters[key].activation = layer['activation']
                     del layer['activation']
-            block  =  (key, layer)
+            block = (key, layer)
         elif layer_name == 'Dropout':
             key = f'Dropout{i}'
             if 'rate' in layer:
@@ -144,30 +136,27 @@ def run_sisy_experiment(sisy_layout : list,
                     pass
                 else:
                     register_custom_layer(
-                                       key,
-                                       Dropout,
-                                       deepcopy(reference_parameters['layers']['Dropout']),
-                                       True)
+                        key,
+                        Dropout,
+                        deepcopy(reference_parameters['layers']['Dropout']),
+                        True)
                     parameters[key].rate = layer['rate']
                     del layer['rate']
-            block  =  (key, layer)
+            block = (key, layer)
 
 
         else:
             block = e
-        blocks.append(block )
-
-
+        blocks.append(block)
 
     layout = Layout(
-       input_size,  # Input size, 13 features I think
-       output_size ,  # Output size, we want just the price
-       output_activation=output_activation,  # linear activation since its continous number
-       output_initializer=output_initializer,
-       # Our template, just one block with two dense layers
-       block=blocks
+        input_size,  # Input size, 13 features I think
+        output_size,  # Output size, we want just the price
+        output_activation=output_activation,  # linear activation since its continous number
+        output_initializer=output_initializer,
+        # Our template, just one block with two dense layers
+        block=blocks
     )
-
 
     experiment_parameters = ExperimentParameters(use_default_values=True)
     experiment_settings = ExperimentSettings()
@@ -191,8 +180,6 @@ def run_sisy_experiment(sisy_layout : list,
         if type(rate) == list and len(rate):
             experiment_parameters.layer_parameter(f'{key}.rate', float_param(rate[0], rate[-1]))
 
-
-
     #
     # for i,units in enumerate(units_list):
     #     key = f'Dense{i}.units'
@@ -212,19 +199,17 @@ def run_sisy_experiment(sisy_layout : list,
     experiment_settings.ga['fitness_type'] = fitness_type
 
     experiment = Experiment(
-       experiment_label,
-       layout=layout,
-       training=training,
-       batch_iterator=batch_iterator,
-       test_batch_iterator=test_batch_iterator,
-       environment=GpuEnvironment(devices=devices, n_jobs=n_jobs),
-       parameters=experiment_parameters,
-       settings=experiment_settings
+        experiment_label,
+        layout=layout,
+        training=training,
+        batch_iterator=batch_iterator,
+        test_batch_iterator=test_batch_iterator,
+        environment=GpuEnvironment(devices=devices, n_jobs=n_jobs),
+        parameters=experiment_parameters,
+        settings=experiment_settings
     )
 
     run_ga_search_experiment(
-       experiment,
-       resume=False,
-       log_level='DEBUG')
-
-
+        experiment,
+        resume=False,
+        log_level='DEBUG')
