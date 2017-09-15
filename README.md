@@ -19,7 +19,7 @@ This is based on [reuters_mlp.py](https://github.com/fchollet/keras/blob/master/
 ```python
           # Our Input size is the number of words in our reuters data we want to examine
 layout = [('Input', {'units': 10000}),
-          # 'units' we specify a range of nodes we want to try
+          # 'units' below, we specify a range of nodes we want to try
           # 'activation' we specify a list of the activation types we want to try
           ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
           # 'rate' is a f(loat)range from 0.2 to 0.8 , forced into a list
@@ -55,7 +55,7 @@ python -m sisy
 
 Will open Sisy log viewer in your browser
 
-![Alt text](ui/assets/s1.png "Optional title")
+![Alt text](ui/assets/s4.png "Optional title")
 
 ![Alt text](ui/assets/s3.png "Optional title")
 
