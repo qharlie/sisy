@@ -1,4 +1,3 @@
-
 import keras
 from keras.datasets import mnist
 from keras.models import Sequential
@@ -30,16 +29,30 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 # model.add(Dense(10, activation='softmax'))
 #
 
-layout = [('Input',{'units': 784,'activation' : 'relu'}),
-          ('Dense',{'units': list(range(300,700)),'activation' : 'relu'}),
-          ('Dropout',{'rate': list(frange(0.1,0.9)) }),
-          ('Dense',{'units': list(range(300,700)),'activation' : 'relu'}),
-          ('Dropout',{'rate': list(frange(0.1,0.9)) }),
-          ('Output',{'units': 10,'activation' : 'softmax'})
-          ]
+layout = [
+    ('Input', {'units': 784, 'activation': 'relu'}),
+    ('Dense', {
+        'units': list(range(300, 700)),
+        'activation': ['relu', 'tanh', 'sigmoid']
+    }),
+    ('Dropout', {
+        'rate': list(frange(0.1, 0.9))
+    }),
+    ('Dense', {
+        'units': list(range(300, 700)),
+        'activation': ['relu', 'tanh', 'sigmoid']
+    }),
+    ('Dropout', {
+        'rate': list(frange(0.1, 0.9))
+    }),
+    ('Output', {
+        'units': 10,
+        'activation': 'softmax'
+    })
+]
 
-run_sisy_experiment(layout,"mnist_mlp",(x_train,y_train),(x_test,y_test),batch_size=batch_size,
-                    epochs=epochs ,shuffle=False,n_jobs=8)
+run_sisy_experiment(layout, "mnist_mlp", (x_train, y_train), (x_test, y_test), batch_size=batch_size,
+                    epochs=epochs, shuffle=False, n_jobs=8)
 
 # model.summary()
 #

@@ -10,7 +10,8 @@ from posix import access, W_OK
 from random import Random
 import traceback
 
-import numpy
+import numpy as np
+
 from numpy import ndarray
 import tensorflow as tf
 random = Random()
@@ -58,6 +59,96 @@ class GpuEnvironment(Environment):
             data_dir=data_dir,
             tf_logging_level=tf_logging_level)
 
+#
+# class SimpleBatchIterator(object):
+#
+#     def __init__(self, X, y, batch_size,
+#                  X_transform=None, y_transform=None,
+#                  autoloop=False, autorestart=False, preload=False,shuffle=True):
+#         self.X = X
+#         self.y = y
+#         self.shuffle = shuffle
+#         self.batch_size = batch_size
+#         self.X_transform = X_transform
+#         self.y_transform = y_transform
+#         self.autoloop = autoloop
+#         self.autorestart = autorestart
+#         self.index = 0
+#         self.preload = preload
+#         self.batch_size = batch_size
+#         self.sample_count = len(X)
+#         self.samples_per_epoch = self.sample_count / batch_size
+#         self.X, self.y = create_batches(X, y, batch_size)
+#
+#     def _transform_data(self, X, y):
+#         if self.X_transform:
+#             X = self.X_transform.fit_transform(X)
+#         if self.y_transform:
+#             y = self.y_transform.fit_transform(y)
+#         return numpy.asarray(X), numpy.asarray(y)
+#
+#     def __iter__(self):
+#         return self
+#
+#     def __next__(self):
+#         try:
+#             if not self.shuffle:
+#                 if self.index >= len(self.X):
+#                     if self.autorestart or self.autoloop:
+#                         self.index = 0
+#                     if self.autorestart or not self.autoloop:
+#                         return None
+#                 X = self.X[self.index+self.index+self.batch_size]
+#                 y = self.y[self.index+self.index+self.batch_size]
+#                 #print("HERE in SIMPLE {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
+#                 self.index += self.batch_size
+#                 return X, y
+#             else:
+#                 if self.index >= len(self.X):
+#                     shuffle_batch(self.X, self.y)
+#                     if self.autorestart or self.autoloop:
+#                         self.index = 0
+#                     if self.autorestart or not self.autoloop:
+#                         return None
+#                 X, y = self._transform_data(
+#                     self.X[self.index],
+#                     self.y[self.index])
+#                 shuffle_batch(X, y)
+#                 self.index += 1
+#                 #print("HERE in __next__ DEFAULT {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
+#                 return X, y
+#
+#         except Exception as ex:
+#             logging.error('Error while iterating %s' % str(ex))
+#             try:
+#                 logging.error(traceback.format_exc())
+#             finally:
+#                 pass
+#             raise ex
+
+
+NL_COUNTER = 0
+def show_progress(c=1,break_point = 100):
+    global NL_COUNTER
+    import sys
+    if NL_COUNTER % break_point == 0 :
+        print(NL_COUNTER)
+    else:
+        sys.stdout.write('.')
+
+    NL_COUNTER += c
+
+
+def generator(features, labels, batch_size):
+ # Create empty arrays to contain batch of features and labels#
+ batch_features = np.zeros((batch_size, 64))
+ batch_labels = np.zeros((batch_size,1))
+ while True:
+   for i in range(batch_size):
+        index= random.randint(0,len(features)-1)
+        batch_labels[i] = labels[index]
+        batch_features[i] = features[index]
+   yield batch_features, batch_labels
 
 class SimpleBatchIterator(object):
 
@@ -76,46 +167,27 @@ class SimpleBatchIterator(object):
         self.preload = preload
         self.batch_size = batch_size
         self.sample_count = len(X)
-        self.samples_per_epoch = self.sample_count
-        self.X, self.y = create_batches(X, y, batch_size)
-
-    def _transform_data(self, X, y):
-        if self.X_transform:
-            X = self.X_transform.fit_transform(X)
-        if self.y_transform:
-            y = self.y_transform.fit_transform(y)
-        return numpy.asarray(X), numpy.asarray(y)
-
-    def __iter__(self):
-        return self
+        self.samples_per_epoch = int(self.sample_count / batch_size)
 
     def __next__(self):
         try:
-            if not self.shuffle:
-                if self.index >= len(self.X):
-                    if self.autorestart or self.autoloop:
-                        self.index = 0
-                    if self.autorestart or not self.autoloop:
-                        return None
-                X = self.X[self.index]
-                y = self.y[self.index]
-                # print("Here in SIMPLE {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
-                self.index += 1
-                return X, y
-            else:
-                if self.index >= len(self.X):
-                    shuffle_batch(self.X, self.y)
-                    if self.autorestart or self.autoloop:
-                        self.index = 0
-                    if self.autorestart or not self.autoloop:
-                        return None
-                X, y = self._transform_data(
-                    self.X[self.index],
-                    self.y[self.index])
-                shuffle_batch(X, y)
-                self.index += 1
-                # print("Here in __next__ DEFAULT {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
-                return X, y
+            i = self.index
+            end = self.index + self.batch_size
+            if i+end >= len(self.X):
+                if self.autorestart or self.autoloop:
+                    self.index = 0
+                    i = 0
+                    end = i + self.batch_size
+
+                if self.autorestart or not self.autoloop:
+                    return None
+            X = self.X[i:end]
+            y = self.y[i:end]
+            #print("HERE in SIMPLE {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
+
+            self.index = end
+            show_progress()
+            return X, y
 
         except Exception as ex:
             logging.error('Error while iterating %s' % str(ex))

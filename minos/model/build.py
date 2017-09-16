@@ -9,10 +9,11 @@ import traceback
 
 import keras
 from keras.engine.topology import Input
-from keras.layers import Merge, merge
+from keras.layers import Merge, merge, Embedding
 from keras.engine.training import Model
 from keras.layers.core import Dense, Lambda
 from keras.regularizers import L1L2
+
 
 from minos.model.parameters import is_custom_activation, get_custom_activation,\
     is_custom_layer, get_custom_layer

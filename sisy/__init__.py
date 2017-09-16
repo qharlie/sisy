@@ -1,3 +1,6 @@
+
+
+
 def ui():
     import os
     import webbrowser
@@ -75,14 +78,20 @@ def run_sisy_experiment(sisy_layout: list,
     input = sisy_layout[0]
     output = sisy_layout[-1]
 
+    input_size = -1
+    if 'units' in input[1]:
+        input_size = input[1]['units']
+    elif 'input_length' in input[1]:
+        input_size = input[1]['input_length']
+    else:
+        print("You must specify the parameter 'units' for the Input layer");
+        return
+
     if 'activation' not in output[1]:
         print("You must specify the parameter 'activation' for the Output layer");
         return;
     if 'units' not in output[1]:
         print("You must specify the parameter 'units' for the Output layer");
-        return;
-    if 'units' not in input[1]:
-        print("You must specify the parameter 'units' for the Input layer");
         return;
 
     output_activation = output[1]['activation']
@@ -91,7 +100,6 @@ def run_sisy_experiment(sisy_layout: list,
         output_initializer = output[1]['kernel_initializer']
 
     output_size = output[1]['units']
-    input_size = input[1]['units']
 
     batch_iterator = SimpleBatchIterator(X_train, y_train, batch_size=batch_size, autoloop=autoloop, preload=True,
                                          shuffle=shuffle)
@@ -110,6 +118,7 @@ def run_sisy_experiment(sisy_layout: list,
     parameters = defaultdict(SisyLayerParams)
 
     blocks = []
+
 
     for i, e in enumerate(sisy_layout[1:-1]):
         block = ()
@@ -154,7 +163,6 @@ def run_sisy_experiment(sisy_layout: list,
         output_size,  # Output size, we want just the price
         output_activation=output_activation,  # linear activation since its continous number
         output_initializer=output_initializer,
-        # Our template, just one block with two dense layers
         block=blocks
     )
 

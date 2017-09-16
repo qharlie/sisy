@@ -26,9 +26,9 @@ X_train = sequence.pad_sequences(X_train, maxlen=maxlen)
 X_test = sequence.pad_sequences(X_test, maxlen=maxlen)
 
 #inputs = Input(shape=(blueprint.layout.input_size,))
-inputs = Input(shape=(maxlen,))
+inputs = Input(shape=(80,))
 output_dim = 256
-embedding = Embedding(input_dim=max_features, output_dim=output_dim)(inputs)
+embedding = Embedding(input_dim=max_features, output_dim=output_dim, input_length=80)(inputs)
 lstm = LSTM(output_dim)(embedding)
 outputs = Dense(1, activation='sigmoid')(lstm)
 

@@ -104,15 +104,30 @@ class ModelTrainer(object):
                     model_filename,
                     blueprint.training.metric.metric))
             start = time()
-            history = model.fit_generator(
-                generator=self.batch_iterator,
-                steps_per_epoch=self.batch_iterator.samples_per_epoch,
-                epochs=nb_epoch,
-                callbacks=callbacks,
-                verbose=verbose,
-                validation_data=self.test_batch_iterator,
-                validation_steps=self.test_batch_iterator.sample_count,
-                class_weight=class_weight)
+
+            X_train = self.batch_iterator.X
+            y_train = self.batch_iterator.y
+            X_test = self.test_batch_iterator.X
+            y_test = self.test_batch_iterator.y
+            batch_size = self.batch_iterator.batch_size
+
+            history = model.fit(X_train, y_train,
+                                batch_size=batch_size,
+                                epochs=nb_epoch,
+                                validation_data=(X_test, y_test),
+                                class_weight=class_weight,
+                                verbose=verbose)
+
+
+            # history = model.fit_generator(
+            #     generator=self.batch_iterator,
+            #     steps_per_epoch=self.batch_iterator.samples_per_epoch,
+            #     epochs=nb_epoch,
+            #     callbacks=callbacks,
+            #     verbose=verbose,
+            #     validation_data=self.test_batch_iterator,
+            #     validation_steps=self.test_batch_iterator.sample_count,
+            #     class_weight=class_weight)
 
             if save_best_model:
                 del model

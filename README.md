@@ -37,7 +37,7 @@ run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_t
                     devices=['/gpu:0','/gpu:1'],
                     # 'population_size' : The number of different blueprints to try per generation.
                     population_size=10,
-                    # 'generations' : The number of times to evolve the generations
+                    # 'generations' : The number of times to evolve the population
                     # ( evolving here means taking the best blueprints and
                     # combining them to create ${population_size} more new blueprints)
                     generations=10,

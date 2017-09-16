@@ -26,6 +26,8 @@ reference_parameters = {
         'Embedding': {
             'output_dim': int_param(1, 10000, default=1),
             'input_dim': int_param(1, 10000, default=1),
+            'input_length': int_param(1, 10000, default=1),
+
         },
         'Dense': {
             'units': int_param(1, 1000, default=100),
