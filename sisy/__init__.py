@@ -1,4 +1,4 @@
-
+from keras.layers import LSTM
 
 
 def ui():
@@ -120,6 +120,8 @@ def run_sisy_experiment(sisy_layout: list,
     blocks = []
 
 
+    # really need to change this to just register every layer with defaults
+    # instead of testing each one
     for i, e in enumerate(sisy_layout[1:-1]):
         block = ()
         layer_name = e[0]
@@ -151,9 +153,21 @@ def run_sisy_experiment(sisy_layout: list,
                         True)
                     parameters[key].rate = layer['rate']
                     del layer['rate']
-            block = (key, layer)
-
-
+                    block = (key, layer)
+        # elif layer_name == 'LSTM':
+        #     key = f'LSTM{i}'
+        #     if 'dropout' in layer:
+        #         if type['layer'] == float:
+        #             pass
+        #         else:
+        #             register_custom_layer(
+        #                 key,
+        #                 LSTM,
+        #                 deepcopy(reference_parameters['layers']['LSTM']),
+        #                 True)
+        #             parameters[key].rate = layer['rate']
+        #             del layer['rate']
+        #             block = (key, layer)
         else:
             block = e
         blocks.append(block)

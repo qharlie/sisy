@@ -5,9 +5,9 @@ from keras.layers import Dense, Dropout
 from keras.optimizers import RMSprop
 from sisy import frange, run_sisy_experiment
 
-batch_size = 256
+batch_size = 128
 num_classes = 10
-epochs = 3
+epochs = 10
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -51,8 +51,11 @@ layout = [
     })
 ]
 
-run_sisy_experiment(layout, "mnist_mlp", (x_train, y_train), (x_test, y_test), batch_size=batch_size,
-                    epochs=epochs, shuffle=False, n_jobs=8)
+run_sisy_experiment(layout, "mnist_mlp", (x_train, y_train), (x_test, y_test),
+                    batch_size=batch_size,
+                    epochs=epochs,
+                    shuffle=False,
+                    n_jobs=8)
 
 # model.summary()
 #

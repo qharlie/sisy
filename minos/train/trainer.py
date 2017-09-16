@@ -118,17 +118,6 @@ class ModelTrainer(object):
                                 class_weight=class_weight,
                                 verbose=verbose)
 
-
-            # history = model.fit_generator(
-            #     generator=self.batch_iterator,
-            #     steps_per_epoch=self.batch_iterator.samples_per_epoch,
-            #     epochs=nb_epoch,
-            #     callbacks=callbacks,
-            #     verbose=verbose,
-            #     validation_data=self.test_batch_iterator,
-            #     validation_steps=self.test_batch_iterator.sample_count,
-            #     class_weight=class_weight)
-
             if save_best_model:
                 del model
                 model = load_keras_model(model_filename)
