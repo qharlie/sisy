@@ -1,3 +1,5 @@
+import importlib
+
 from keras.layers import LSTM
 
 
@@ -13,16 +15,18 @@ if __name__ == "__main__":
 
 
 def frange(x, y, jump=0.1):
-    while x < y:
-        yield x
-        x += jump
+    import numpy as np
+    return list(np.arange(x, y, jump))
 
 
 class SisyLayerParams(object):
     def __init__(self):
-        self.units = []
-        self.activation = []
-        self.rate = []
+        self.p = {}
+    def __getitem__(self, item):
+        return self.p[item]
+    def __setitem__(self, key, value):
+        self.p[key] = value
+
 
 
 def run_sisy_experiment(sisy_layout: list,
@@ -119,58 +123,83 @@ def run_sisy_experiment(sisy_layout: list,
 
     blocks = []
 
-
     # really need to change this to just register every layer with defaults
     # instead of testing each one
     for i, e in enumerate(sisy_layout[1:-1]):
-        block = ()
+        block = None
         layer_name = e[0]
         layer = deepcopy(e[1])
-        if layer_name == 'Dense':
-            key = f'Dense{i}'
-            register_custom_layer(
-                key,
-                Dense,
-                deepcopy(reference_parameters['layers']['Dense']),
-                True)
-            parameters[key].units = layer['units']
-            del layer['units']
-            if 'activation' in layer:
-                if type(layer['activation']) == list:
-                    parameters[key].activation = layer['activation']
-                    del layer['activation']
-            block = (key, layer)
-        elif layer_name == 'Dropout':
-            key = f'Dropout{i}'
-            if 'rate' in layer:
-                if type(layer['rate']) == float:
-                    pass
-                else:
+
+        cloneable_layers = reference_parameters['layers'].keys()
+        if layer_name in cloneable_layers:
+            layer_key = f'{layer_name}{i}'
+            for key in list(layer.keys()):
+
+                layers_module  = importlib.import_module('keras.layers.core')
+                custom_class = getattr(layers_module,layer_name)
+                if type(layer[key]) == list or type(layer[key]) == range:
                     register_custom_layer(
-                        key,
-                        Dropout,
-                        deepcopy(reference_parameters['layers']['Dropout']),
+                        layer_key,
+                        custom_class,
+                        deepcopy(reference_parameters['layers'][layer_name]),
                         True)
-                    parameters[key].rate = layer['rate']
-                    del layer['rate']
-                    block = (key, layer)
-        # elif layer_name == 'LSTM':
-        #     key = f'LSTM{i}'
-        #     if 'dropout' in layer:
-        #         if type['layer'] == float:
+                    parameters[layer_key][key] = layer[key]
+                    del layer[key]
+            block = (layer_key, layer)
+        else:
+            block = e
+
+        blocks.append(block)
+
+        # parameters[key] = layer[key]
+        # del layer[key]
+        # If its a list we know its one of ours
+
+        # if layer_name == 'Dense':
+        #     key = f'Dense{i}'
+        #     register_custom_layer(
+        #         key,
+        #         Dense,
+        #         deepcopy(reference_parameters['layers']['Dense']),
+        #         True)
+        #     parameters[key].units = layer['units']
+        #     del layer['units']
+        #     if 'activation' in layer:
+        #         if type(layer['activation']) == list:
+        #             parameters[key].activation = layer['activation']
+        #             del layer['activation']
+        #     block = (key, layer)
+        # elif layer_name == 'Dropout':
+        #     key = f'Dropout{i}'
+        #     if 'rate' in layer:
+        #         if type(layer['rate']) == float:
         #             pass
         #         else:
         #             register_custom_layer(
         #                 key,
-        #                 LSTM,
-        #                 deepcopy(reference_parameters['layers']['LSTM']),
+        #                 Dropout,
+        #                 deepcopy(reference_parameters['layers']['Dropout']),
         #                 True)
         #             parameters[key].rate = layer['rate']
         #             del layer['rate']
         #             block = (key, layer)
-        else:
-            block = e
-        blocks.append(block)
+        # # elif layer_name == 'LSTM':
+        # #     key = f'LSTM{i}'
+        # #     if 'dropout' in layer:
+        # #         if type['layer'] == float:
+        # #             pass
+        # #         else:
+        # #             register_custom_layer(
+        # #                 key,
+        # #                 LSTM,
+        # #                 deepcopy(reference_parameters['layers']['LSTM']),
+        # #                 True)
+        # #             parameters[key].rate = layer['rate']
+        # #             del layer['rate']
+        # #             block = (key, layer)
+        # else:
+        #     block = e
+        # blocks.append(block)
 
     layout = Layout(
         input_size,  # Input size, 13 features I think
@@ -189,18 +218,39 @@ def run_sisy_experiment(sisy_layout: list,
 
     for key in parameters.keys():
         layer = parameters[key]
-        if len(layer.activation):
-            experiment_parameters.layer_parameter(f'{key}.activation', string_param(layer.activation))
+        for x in layer.p.keys():
+            a = layer.p[x]
+            # Its a numeric parameter
+            if type(a) == range:
+                # Its an int
+                if type(list(a)[0]) == int:
+                    experiment_parameters.layer_parameter(f'{key}.{x}', int_param(a[0], a[-1]))
+                    print("ITS AN INT!")
+                if type(list(a)[0]) == float:
+                    experiment_parameters.layer_parameter(f'{key}.{x}', float_param(a[0], a[-1]))
+                    print("ITS AN FLOAT !")
+            # Its a string parameter
+            if type(a) == list:
+                print("ITS A STRING! {}".format(str(list(a))))
+                experiment_parameters.layer_parameter(f'{key}.{x}', string_param(a))
 
-        units = layer.units
-        if type(units) == int:
-            experiment_parameters.layer_parameter(f'{key}.units', units)
-        elif type(units) == list and len(units):
-            experiment_parameters.layer_parameter(f'{key}.units', int_param(units[0], units[-1]))
 
-        rate = layer.rate
-        if type(rate) == list and len(rate):
-            experiment_parameters.layer_parameter(f'{key}.rate', float_param(rate[0], rate[-1]))
+
+
+
+
+        # if len(layer.activation):
+        #     experiment_parameters.layer_parameter(f'{key}.activation', string_param(layer.activation))
+        #
+        # units = layer.units
+        # if type(units) == int:
+        #     experiment_parameters.layer_parameter(f'{key}.units', units)
+        # elif type(units) == list and len(units):
+        #     experiment_parameters.layer_parameter(f'{key}.units', int_param(units[0], units[-1]))
+        #
+        # rate = layer.rate
+        # if type(rate) == list and len(rate):
+        #     experiment_parameters.layer_parameter(f'{key}.rate', float_param(rate[0], rate[-1]))
 
     #
     # for i,units in enumerate(units_list):

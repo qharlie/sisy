@@ -12,7 +12,7 @@ from sisy import run_sisy_experiment
 
 layout = [('Input', {'units': 20, 'activation': 'relu'}),
           ('Dense', {'units': range(20,200), 'activation': 'relu'}),
-          ('Dense', {'units': range(20,200), 'activation': 'relu'}),
+          ('Dense', {'units': range(20,200), 'activation': ['relu','tanh']}),
           ('Output', {'units': 1, 'activation': 'sigmoid'}),
           ]
 run_sisy_experiment(layout, 'binary_classifier', (x_train, y_train), (x_test, y_test), epochs=5, batch_size=128,
