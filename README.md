@@ -7,7 +7,7 @@
  ```
 
 
-Based heavily on the work of [Minos](https://github.com/guybedo/minos) , Sisy uses [genetic algorithms](https://github.com/deap/deap) to find the best topology and hyper parameters for your keras neural networks.
+Using [Minos](https://github.com/guybedo/minos) to do the heavy lifting, Sisy uses [genetic algorithms](https://github.com/deap/deap) to find the best topology and hyper parameters for your keras neural networks.
 
 
 ## Examples
