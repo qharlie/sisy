@@ -2,9 +2,7 @@
 
 
 #### Install sisy:
- ```
- pip install pysisy==0.13
- ```
+ Sisy is still in development, to install it you would need to clone the repository and at the sisy/-root install it locally as a pip package wtih `pip install -e .` See [https://pip.pypa.io/en/stable/reference/pip_install/#install-editable](https://pip.pypa.io/en/stable/reference/pip_install/#install-editable)
 
 
 Using [Minos](https://github.com/guybedo/minos) to do the heavy lifting, Sisy uses [genetic algorithms](https://github.com/deap/deap) to find the best topology and hyper parameters for your keras neural networks.
