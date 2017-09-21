@@ -24,7 +24,6 @@ layout = [('Input', {'units': 10000}),
           ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
           # 'rate' is a f(loat)range from 0.2 to 0.8 , forced into a list
           ('Dropout', {'rate': list(frange(0.2,0.8))}),
-          # Our Output size is the number of categories we want to classify the article into
           ('Output', {'units': 42, 'activation': 'softmax'})]
 
 run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_test),
