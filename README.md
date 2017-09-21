@@ -19,7 +19,7 @@ This is based on [reuters_mlp.py](https://github.com/fchollet/keras/blob/master/
 ```python
           # Our Input size is the number of words in our reuters data we want to examine
 layout = [('Input', {'units': 10000}),
-          # 'units' below, we specify a range of nodes we want to try
+          # 'units' : a range to try for the number of inputs 
           # 'activation' we specify a list of the activation types we want to try
           ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
           # 'rate' is a f(loat)range from 0.2 to 0.8 , forced into a list
