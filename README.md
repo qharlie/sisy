@@ -2,12 +2,10 @@
 
 
 #### Install sisy:
- ```
- pip install pysisy==0.13
- ```
+ Sisy is still in development, to install it you would need to clone the repository and at the sisy/-root install it locally as a pip package wtih `pip install -e .` See [https://pip.pypa.io/en/stable/reference/pip_install/#install-editable](https://pip.pypa.io/en/stable/reference/pip_install/#install-editable)
 
 
-Based heavily on the work of [Minos](https://github.com/guybedo/minos) , Sisy uses [genetic algorithms](https://github.com/deap/deap) to find the best topology and hyper parameters for your keras neural networks.
+Using [Minos](https://github.com/guybedo/minos) to do the heavy lifting, Sisy uses [genetic algorithms](https://github.com/deap/deap) to find the best topology and hyper parameters for your keras neural networks.
 
 
 ## Examples
@@ -19,12 +17,11 @@ This is based on [reuters_mlp.py](https://github.com/fchollet/keras/blob/master/
 ```python
           # Our Input size is the number of words in our reuters data we want to examine
 layout = [('Input', {'units': 10000}),
-          # 'units' below, we specify a range of nodes we want to try
+          # 'units' : a range to try for the number of inputs 
           # 'activation' we specify a list of the activation types we want to try
           ('Dense', {'units': range(400, 600), 'activation': ['relu','tanh']}),
           # 'rate' is a f(loat)range from 0.2 to 0.8 , forced into a list
           ('Dropout', {'rate': list(frange(0.2,0.8))}),
-          # Our Output size is the number of categories we want to classify the article into
           ('Output', {'units': 42, 'activation': 'softmax'})]
 
 run_sisy_experiment(layout, 'sisy_reuters_mlp', (x_train, y_train), (x_test, y_test),
