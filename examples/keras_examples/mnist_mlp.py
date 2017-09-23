@@ -51,7 +51,10 @@ layout = [
     })
 ]
 
-run_sisy_experiment(layout, "mnist_mlp", (x_train, y_train), (x_test, y_test),
+run_sisy_experiment(layout,
+                    "mnist_mlp",
+                    (x_train, y_train),
+                    (x_test, y_test),
                     batch_size=batch_size,
                     epochs=epochs,
                     shuffle=False,

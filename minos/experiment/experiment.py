@@ -160,6 +160,7 @@ def _assert_valid_training_parameters(experiment):
 
 
 def load_experiment_best_blueprint(experiment_label, environment=Environment()):
+
     experiment = Experiment(experiment_label, environment=environment)
     last_step, _ = load_experiment_checkpoint(experiment)
     blueprints = list()
@@ -170,6 +171,7 @@ def load_experiment_best_blueprint(experiment_label, environment=Environment()):
             step,
             environment=environment,
         minimize=minimize)
+        print(blueprint)
         if blueprint:
             blueprints.append(blueprint)
     if len(blueprints) == 0:

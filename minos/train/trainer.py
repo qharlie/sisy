@@ -2,6 +2,7 @@
 Created on Feb 12, 2017
 
 @author: julien
+@author: Charlie, 9-2017
 '''
 import logging
 from multiprocessing import Queue, Process
@@ -16,7 +17,7 @@ from minos.experiment.training import EpochStoppingCondition, \
     AccuracyDecreaseStoppingCondition, StoppingConditionWrapper, \
     get_associated_validation_metric, is_minimize_metric
 from minos.tf_utils import setup_tf_session
-from minos.utils import disable_sysout, load_keras_model
+from minos.utils import disable_sysout, load_keras_model, save_sisy_model
 
 
 class MultiProcessModelTrainer(object):
@@ -43,7 +44,9 @@ class MultiProcessModelTrainer(object):
                         device_id,
                         device,
                         work_queue,
-                        result_queue))
+                        result_queue,
+                        _job
+                    ))
                 for device_id, device in enumerate(self.environment.devices)
                 for _job in range(self.environment.n_jobs[device_id])]
             self.process_count = 0
@@ -156,12 +159,14 @@ class ModelTrainer(object):
 
 
 def model_training_worker(batch_iterator, test_batch_iterator,
-                          device_id, device, work_queue, result_queue):
+                          device_id, device, work_queue, result_queue, step ):
     # disable_sysout()
     model_trainer = ModelTrainer(
         batch_iterator,
         test_batch_iterator)
     work = work_queue.get()
+    best_score = 0
+
     while work:
         try:
             idx, _total, blueprint = work
@@ -182,6 +187,10 @@ def model_training_worker(batch_iterator, test_batch_iterator,
                 score, epoch_best, epoch_total = 0, 0, 0
             result_queue.put((idx, score, epoch_best, epoch_total, blueprint, duration, device_id))
             work = work_queue.get()
+            if score > best_score:
+                best_score = score
+                save_sisy_model(model,'testing',step)
+
         except Exception as ex:
             logging.error(ex)
             logging.error(traceback.format_exc())

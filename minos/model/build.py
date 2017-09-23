@@ -134,10 +134,25 @@ def _build_layer_model(inputs, layer):
         raise ex
 
 
+def is_loaded_type(layer_type) -> bool :
+    if str(layer_type[-1]).isdigit():
+        return True
+    else:
+        return False
+
+
+def fix_loaded_type(layer_type) -> str :
+    while str(layer_type[-1]).isdigit():
+        layer_type = layer_type[0:-1]
+    return layer_type
+
+
 def _get_layer_model(layer_type):
     if is_custom_layer(layer_type):
         return get_custom_layer(layer_type)[0]
-    modules = [keras.layers, keras.layers.normalization]
+    if is_loaded_type(layer_type):
+        layer_type = fix_loaded_type(layer_type)
+    modules = [keras.layers.core, keras.layers.normalization]
     for module in modules:
         model = getattr(module, layer_type)
         if model:
@@ -177,3 +192,5 @@ def _get_regularizer(regularizer_parameter):
 def _build_optimizer(training):
     optimizer = getattr(keras.optimizers, training.optimizer.optimizer)
     return optimizer(**training.optimizer.parameters)
+
+print(fix_loaded_type("Dense00023"))

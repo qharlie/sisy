@@ -2,6 +2,10 @@ import importlib
 
 from keras.layers import LSTM
 
+from minos.utils import save_sisy_model
+from minos.utils import load_sisy_model
+
+
 
 def ui():
     import os
@@ -17,7 +21,6 @@ if __name__ == "__main__":
 def frange(x, y, jump=0.1):
     import numpy as np
     return list(np.arange(x, y, jump))
-
 
 class SisyLayerParams(object):
     def __init__(self):
@@ -63,14 +66,14 @@ def run_sisy_experiment(sisy_layout: list,
     from minos.experiment.experiment import ExperimentParameters
 
     if len(sisy_layout) < 2:
-        print("Sisy Layout must be at least size 2, an output, middle, and output layer")
+        print("Sisy Layout must be at least size 2, an input, middle, and output layer")
         return;
 
     if len(XYTrainTuple) != 2:
         print("XYTrainTuple must be a tuple of length 2, (X_train,y_train) ")
         return;
     if len(XYTestTuple) != 2:
-        print("XYTrainTuple must be a tuple of length 2, (X_train,y_train) ")
+        print("XYTestTuple must be a tuple of length 2, (X_test,y_test) ")
         return;
 
     X_train = XYTrainTuple[0]
@@ -225,13 +228,12 @@ def run_sisy_experiment(sisy_layout: list,
                 # Its an int
                 if type(list(a)[0]) == int:
                     experiment_parameters.layer_parameter(f'{key}.{x}', int_param(a[0], a[-1]))
-                    print("ITS AN INT!")
+
                 if type(list(a)[0]) == float:
                     experiment_parameters.layer_parameter(f'{key}.{x}', float_param(a[0], a[-1]))
-                    print("ITS AN FLOAT !")
+
             # Its a string parameter
             if type(a) == list:
-                print("ITS A STRING! {}".format(str(list(a))))
                 experiment_parameters.layer_parameter(f'{key}.{x}', string_param(a))
 
 
@@ -266,8 +268,6 @@ def run_sisy_experiment(sisy_layout: list,
     experiment_settings.ga['generations'] = generations
     experiment_settings.ga['p_offspring'] = offspring
     experiment_settings.ga['p_mutation'] = mutation
-
-    # TO specify minimizing the loss , lets use FitnessMin for a evolution criteria
     experiment_settings.ga['fitness_type'] = fitness_type
 
     experiment = Experiment(
@@ -281,7 +281,7 @@ def run_sisy_experiment(sisy_layout: list,
         settings=experiment_settings
     )
 
-    run_ga_search_experiment(
+    return run_ga_search_experiment(
         experiment,
         resume=False,
         log_level='DEBUG')

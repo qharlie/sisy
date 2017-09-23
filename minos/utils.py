@@ -18,6 +18,31 @@ from minos.tf_utils import setup_tf_session, cpu_device
 def disable_sysout():
     sys.stdout.write = lambda s: s
 
+def save_sisy_model(model, name,step):
+        # serialize model to JSON
+    print("SAVING SISSY MODEL {} {} {}".format(model,name,step))
+    model_json = model.to_json()
+    with open("{}.model.{}.json".format(name,step), "w") as json_file:
+        json_file.write(model_json)
+    # serialize weights to HDF5
+    model.save_weights("{}.model.{}.h5".format(name,step))
+    print("Saved model to disk")
+
+    # later...
+
+def load_sisy_model(name,step):
+    from keras.models import model_from_json
+
+    # load json and create model
+    json_file = open('{}.model.{}.json'.format(name,step), 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    loaded_model = model_from_json(loaded_model_json)
+    # load weights into new model
+    loaded_model.load_weights("{}.model.{}.h5".format(name,step))
+    print("Loaded model from disk")
+    return loaded_model
+
 
 def load_best_model(experiment_label, step, X_train=None, y_train=None, X_test=None, y_test=None, batch_size=1,
                     epochs=100):
@@ -28,6 +53,7 @@ def load_best_model(experiment_label, step, X_train=None, y_train=None, X_test=N
     from minos.train.utils import Environment
     from minos.model.build import ModelBuilder
 
+
     blueprints = load_experiment_blueprints(
         experiment_label,
         step,
@@ -37,6 +63,7 @@ def load_best_model(experiment_label, step, X_train=None, y_train=None, X_test=N
         cpu_device(),
         compile_model=True)
     logging.info(model.to_json())
+    print(model.to_json())
     model.summary()
     if X_train is not None and len(X_train):
         logging.info("Now training model from blueprint")
