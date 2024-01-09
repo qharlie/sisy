@@ -6,7 +6,7 @@ Created on Feb 15, 2017
 from copy import deepcopy
 import unittest
 
-from keras.layers.core import Dense
+from keras.layers import Dense
 
 from minos.experiment.experiment import Experiment, ExperimentParameters,\
     check_experiment_parameters

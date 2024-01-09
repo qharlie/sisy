@@ -8,10 +8,10 @@ import logging
 import traceback
 
 import keras
-from keras.engine.topology import Input
-from keras.layers import Merge, merge, Embedding
-from keras.engine.training import Model
-from keras.layers.core import Dense, Lambda
+from keras import Input
+from keras.layers import Concatenate, concatenate
+from keras.models import Model
+from keras.layers import Dense, Lambda
 from keras.regularizers import L1L2
 
 
@@ -91,7 +91,7 @@ def _build_multi_gpu_model(blueprint, devices):
                 arguments={'idx': i, 'parts': len(devices)})(x)
             outputs.append(model(model_input))
     with tf.device(cpu_device()):
-        output = merge(outputs, mode='concat', concat_axis=0)
+        output = concatenate(outputs, concat_axis=0)
         return MultiGpuModel(
             model,
             model_input=model.inputs,
@@ -117,7 +117,7 @@ def _build_block_model(inputs, block):
 
 def _maybe_merge_inputs(inputs):
     if isinstance(inputs, list) and len(inputs) > 1:
-        return Merge(mode='concat')(inputs)
+        return Concatenate()(inputs)
     elif isinstance(inputs, list) and len(inputs) == 1:
         return inputs[0]
     else:
@@ -152,7 +152,7 @@ def _get_layer_model(layer_type):
         return get_custom_layer(layer_type)[0]
     if is_loaded_type(layer_type):
         layer_type = fix_loaded_type(layer_type)
-    modules = [keras.layers.core, keras.layers.normalization]
+    modules = [keras.layers, keras.layers.normalization]
     for module in modules:
         model = getattr(module, layer_type)
         if model:

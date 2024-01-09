@@ -6,7 +6,7 @@ from examples.ga.dataset import get_reuters_dataset
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation, Dropout
+from keras.layers import Dense, Activation, Dropout
 from keras.datasets import boston_housing, imdb
 import keras.metrics as metrics
 import math

@@ -3,6 +3,7 @@ Created on Feb 12, 2017
 
 @author: julien
 '''
+import os
 import logging
 from os import path, makedirs
 from os.path import join
@@ -20,7 +21,7 @@ random = Random()
 class Environment(object):
 
     def __init__(self, devices=None, n_jobs=None,
-                 data_dir=None, tf_logging_level=tf.logging.ERROR):
+                 data_dir=None, tf_logging_level=logging.ERROR):
         self.devices = devices
         self.n_jobs = n_jobs
         if devices and n_jobs and not isinstance(n_jobs, list):
@@ -40,8 +41,8 @@ class Environment(object):
 
 class CpuEnvironment(Environment):
 
-    def __init__(self, n_jobs=1, data_dir=None,
-                 tf_logging_level=tf.logging.ERROR):
+    def __init__(self, n_jobs=os.environ["N_JOBS"], data_dir=None,
+                 tf_logging_level=logging.ERROR):
         super().__init__(
             ['/cpu:0'],
             n_jobs,
@@ -51,8 +52,8 @@ class CpuEnvironment(Environment):
 
 class GpuEnvironment(Environment):
 
-    def __init__(self, devices=['/gpu:0'], n_jobs=1, data_dir=None,
-                 tf_logging_level=tf.logging.ERROR):
+    def __init__(self, devices=['/gpu:0'], n_jobs=os.environ["N_JOBS"], data_dir=None,
+                 tf_logging_level=logging.ERROR):
         super().__init__(
             devices,
             n_jobs,

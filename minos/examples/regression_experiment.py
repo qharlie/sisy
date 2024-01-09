@@ -4,7 +4,7 @@ import sys
 from copy import deepcopy
 
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation, Dropout
+from keras.layers import Dense, Activation, Dropout
 from keras.datasets import boston_housing
 import keras.metrics as metrics
 import math
