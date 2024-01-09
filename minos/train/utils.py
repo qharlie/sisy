@@ -184,7 +184,7 @@ class SimpleBatchIterator(object):
                     return None
             X = self.X[i:end]
             y = self.y[i:end]
-            #print("HERE in SIMPLE {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
+            print("HERE in SIMPLE {} ({})\n\nReturning X, Y\n\n{}\n\n{}".format(self.index,self.batch_size, X.shape, y.shape))
 
             self.index = end
             show_progress()
@@ -223,8 +223,8 @@ def shuffle_batch(X, y):
 
 def swap(values, idx1, idx2):
     if isinstance(values, ndarray):
-        swap = numpy.copy(values[idx2])
-        values[idx2] = numpy.copy(values[idx1])
+        swap = np.copy(values[idx2])
+        values[idx2] = np.copy(values[idx1])
         values[idx1] = swap
     else:
         swap = values[idx2]

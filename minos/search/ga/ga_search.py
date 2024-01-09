@@ -80,8 +80,15 @@ def init_ga_env(experiment):
 
 
 def sort_population(population, population_size, minimize=False):
+    to_sort = []
+    for i in population:
+        for value in i.fitness.values:
+            if value is not None:
+                to_sort.append(i)
+                break
+    population_size = min(len(to_sort), population_size)
     return list(sorted(
-        population,
+        to_sort,
         key=lambda i: -i.fitness.values[0] if not minimize else i.fitness.values[0]))[:population_size]
 
 
@@ -159,13 +166,21 @@ def get_generation_logger(experiment, step_logger=None):
 
 def log_generation_info(experiment, generation, population):
     minimize = get_is_minimization_problem(experiment)
+    to_sort = []
+    for i in population:
+        for value in i.fitness.values:
+            if value is not None:
+                to_sort.append(i)
+                break
+    population = to_sort
     sorted_population = list(sorted(
-        population,
+        to_sort,
         key=lambda i: -i.fitness.values[0] if not minimize else i.fitness.values[0]))
     population_scores = [
         individual.fitness.values[0]
         for individual in population]
-
+    if len(population) == 0:
+        return
     model = ModelBuilder().build(
         population[0],
         cpu_device(),

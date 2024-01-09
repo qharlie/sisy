@@ -54,7 +54,7 @@ class TrainTest(unittest.TestCase):
             model_filename = join(tmp_dir, 'model')
             model, history, _duration = trainer.train(
                 blueprint,
-                [cpu_device(), cpu_device()],
+                [cpu_device()],
                 save_best_model=True,
                 model_filename=model_filename)
             model.predict(test_batch_iterator.X[0], len(test_batch_iterator.X[0]))

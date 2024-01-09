@@ -9,7 +9,7 @@ from multiprocessing import Queue, Process
 from threading import Thread
 from time import time
 import traceback
-
+from time import sleep
 from keras.callbacks import ModelCheckpoint
 import numpy
 
@@ -33,25 +33,32 @@ class MultiProcessModelTrainer(object):
     def _start_training_workers(self, blueprints):
         try:
             total_n_jobs = sum(self.environment.n_jobs)
+            logging.info('total_n_jobs {}'.format(total_n_jobs))
+            logging.info(self.environment.n_jobs)
+            logging.info(self.environment.devices)
             work_queue = Queue(total_n_jobs)
             result_queue = Queue(total_n_jobs)
+            
+            print(self.environment.devices)
             self.processes = [
-                Process(
-                    target=model_training_worker,
-                    args=(
-                        self.batch_iterator,
-                        self.test_batch_iterator,
-                        device_id,
-                        device,
-                        work_queue,
-                        result_queue,
-                        _job
-                    ))
-                for device_id, device in enumerate(self.environment.devices)
-                for _job in range(self.environment.n_jobs[device_id])]
+            Process(
+                target=model_training_worker,
+                args=(
+                    self.batch_iterator,
+                    self.test_batch_iterator,
+                    device_id,
+                    device,
+                    work_queue,
+                    result_queue,
+                    _job
+                ))
+            for device_id, device in enumerate(self.environment.devices)
+            for _job in range(self.environment.n_jobs[device_id])
+            ]
+
             self.process_count = 0
             for process in self.processes:
-                self.process_count += 1
+                sleep(0.1)
                 process.start()
 
             def _work_feeder():
@@ -67,7 +74,7 @@ class MultiProcessModelTrainer(object):
             while self.process_count > 0:
                 result = result_queue.get()
                 if result:
-                    logging.debug(
+                    logging.info(
                         'Blueprint %d: best score %f, epoch %d/%d',
                         result[0],
                         result[1],

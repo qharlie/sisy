@@ -8,8 +8,8 @@ import logging
 import traceback
 
 import keras
-from keras import Input
-from keras.layers import Concatenate, concatenate
+from keras.layers import Input
+from keras.layers import Concatenate, concatenate, Embedding
 from keras.models import Model
 from keras.layers import Dense, Lambda
 from keras.regularizers import L1L2
@@ -130,7 +130,7 @@ def _build_layer_model(inputs, layer):
         model = _get_layer_model(layer.layer_type)
         return model(**parameters)(inputs)
     except Exception as ex:
-        logging.debug(traceback.format_exc())
+        logging.info(traceback.format_exc())
         raise ex
 
 
@@ -152,7 +152,7 @@ def _get_layer_model(layer_type):
         return get_custom_layer(layer_type)[0]
     if is_loaded_type(layer_type):
         layer_type = fix_loaded_type(layer_type)
-    modules = [keras.layers, keras.layers.normalization]
+    modules = [keras.layers, keras.layers.BatchNormalization]
     for module in modules:
         model = getattr(module, layer_type)
         if model:
@@ -190,7 +190,11 @@ def _get_regularizer(regularizer_parameter):
 
 
 def _build_optimizer(training):
-    optimizer = getattr(keras.optimizers, training.optimizer.optimizer)
+    if training.optimizer.optimizer == "SGD":
+        optimizer = getattr(keras.optimizers.legacy, training.optimizer.optimizer)
+    else:
+        optimizer = getattr(keras.optimizers, training.optimizer.optimizer)
     return optimizer(**training.optimizer.parameters)
 
 print(fix_loaded_type("Dense00023"))
+print('wtf')

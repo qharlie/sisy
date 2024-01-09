@@ -42,7 +42,7 @@ def run_sisy_experiment(sisy_layout: list,
                         autoloop=True,
                         population_size=25,
                         epochs=50,
-                        devices=['/gpu:0', '/gpu:1'],
+                        devices=['/cpu:0'],
                         n_jobs=os.environ['N_JOBS'],
                         optimizer='SGD',
                         loss='categorical_crossentropy',
@@ -63,7 +63,7 @@ def run_sisy_experiment(sisy_layout: list,
     from minos.model.model import Layout, Objective, Optimizer, Metric
     from minos.model.parameter import int_param, string_param, float_param
     from minos.model.parameters import register_custom_layer, reference_parameters
-    from minos.train.utils import SimpleBatchIterator, CpuEnvironment
+    from minos.train.utils import SimpleBatchIterator, GpuEnvironment
     from minos.experiment.experiment import ExperimentParameters
 
     if len(sisy_layout) < 2:
@@ -277,7 +277,7 @@ def run_sisy_experiment(sisy_layout: list,
         training=training,
         batch_iterator=batch_iterator,
         test_batch_iterator=test_batch_iterator,
-        environment=CpuEnvironment( n_jobs=n_jobs),
+        environment=GpuEnvironment( devices=devices, n_jobs=n_jobs),
         parameters=experiment_parameters,
         settings=experiment_settings
     )
