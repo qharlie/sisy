@@ -138,10 +138,9 @@ reference_parameters = {
         },
         'Dropout': {
             'rate': float_param(default=0.75)},
-        'Merge': {
+        'Concatenate': {
             'mode': string_param(
-                ['sum', 'mul', 'concat', 'ave', 'cos', 'dot', 'max'],
-                default='concat',
+                [],
                 mutable=False)},
         'BatchNormalization': {
             'epsilon': float_param(default=0.001),
@@ -181,43 +180,40 @@ reference_parameters = {
         }
     },
     'optimizers': {
-        'sgd': {
-            'lr': float_param(default=1e-3),
+        'SGD': {
+            'learning_rate': float_param(default=1e-3),
             'momentum': float_param(default=0.0),
-            'decay': float_param(default=0.0),
             'nesterov': boolean_param(default=False)},
-        'rmsprop': {
-            'lr': float_param(default=1e-3),
+        'SGD': {
+            'learning_rate': float_param(default=1e-3),
+            'momentum': float_param(default=0.0),
+            'nesterov': boolean_param(default=False)},
+        'RMSprop': {
+            'learning_rate': float_param(default=1e-3),
             'rho': float_param(default=0.9),
-            'epsilon': float_param(default=1e-08),
-            'decay': float_param(default=0.0)},
-        'adagrad': {
-            'lr': float_param(default=1e-3),
-            'epsilon': float_param(default=1e-08),
-            'decay': float_param(default=0.0)},
-        'adadelta': {
-            'lr': float_param(default=1e-3),
+            'epsilon': float_param(default=1e-08)},
+        'Adagrad': {
+            'learning_rate': float_param(default=1e-3),
+            'epsilon': float_param(default=1e-08)},
+        'Adadelta': {
+            'learning_rate': float_param(default=1e-3),
             'rho': float_param(default=0.9),
-            'epsilon': float_param(default=1e-08),
-            'decay': float_param(default=0.0)},
-        'adam': {
-            'lr': float_param(default=1e-3),
+            'epsilon': float_param(default=1e-08)},
+        'Adam': {
+            'learning_rate': float_param(default=1e-3),
             'beta_1': float_param(default=0.9),
             'beta_2': float_param(default=0.999),
-            'epsilon': float_param(default=1e-08),
-            'decay': float_param(default=0.0)},
-        'adamax': {
-            'lr': float_param(default=1e-3),
+            'epsilon': float_param(default=1e-08)},
+        'Adamax': {
+            'learning_rate': float_param(default=1e-3),
             'beta_1': float_param(default=0.9),
             'beta_2': float_param(default=0.999),
-            'epsilon': float_param(default=1e-08),
-            'decay': float_param(default=0.0)},
-        'nadam': {
-            'lr': float_param(default=1e-3),
+            'epsilon': float_param(default=1e-08)},
+        'Nadam': {
+            'learning_rate': float_param(default=1e-3),
             'beta_1': float_param(default=0.9),
             'beta_2': float_param(default=0.999),
-            'epsilon': float_param(default=1e-08),
-            'schedule_decay': float_param(default=4e-3)}},
+            'epsilon': float_param(default=1e-08)}},
     'metric': string_param([
         'binary_accuracy',
         'categorical_accuracy',

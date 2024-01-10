@@ -183,7 +183,7 @@ def _setup_block_input(layout, row_idx, block, experiment_parameters):
         return
     template = layout.block_input
     if not template:
-        template = [('Merge', dict(mode='concat'))]
+        template = [('Concatenate', dict())]
     block.input_layers = _create_template_layers(template, experiment_parameters)
     for layer in block.input_layers:
         layer.apply_constraints()

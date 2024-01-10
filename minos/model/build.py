@@ -8,10 +8,10 @@ import logging
 import traceback
 
 import keras
-from keras.engine.topology import Input
-from keras.layers import Merge, merge, Embedding
-from keras.engine.training import Model
-from keras.layers.core import Dense, Lambda
+from keras.layers import Input
+from keras.layers import Concatenate, concatenate, Embedding
+from keras.models import Model
+from keras.layers import Dense, Lambda
 from keras.regularizers import L1L2
 
 
@@ -91,7 +91,7 @@ def _build_multi_gpu_model(blueprint, devices):
                 arguments={'idx': i, 'parts': len(devices)})(x)
             outputs.append(model(model_input))
     with tf.device(cpu_device()):
-        output = merge(outputs, mode='concat', concat_axis=0)
+        output = concatenate(outputs, concat_axis=0)
         return MultiGpuModel(
             model,
             model_input=model.inputs,
@@ -117,7 +117,7 @@ def _build_block_model(inputs, block):
 
 def _maybe_merge_inputs(inputs):
     if isinstance(inputs, list) and len(inputs) > 1:
-        return Merge(mode='concat')(inputs)
+        return Concatenate()(inputs)
     elif isinstance(inputs, list) and len(inputs) == 1:
         return inputs[0]
     else:
@@ -130,7 +130,7 @@ def _build_layer_model(inputs, layer):
         model = _get_layer_model(layer.layer_type)
         return model(**parameters)(inputs)
     except Exception as ex:
-        logging.debug(traceback.format_exc())
+        logging.info(traceback.format_exc())
         raise ex
 
 
@@ -152,7 +152,7 @@ def _get_layer_model(layer_type):
         return get_custom_layer(layer_type)[0]
     if is_loaded_type(layer_type):
         layer_type = fix_loaded_type(layer_type)
-    modules = [keras.layers.core, keras.layers.normalization]
+    modules = [keras.layers, keras.layers.BatchNormalization]
     for module in modules:
         model = getattr(module, layer_type)
         if model:
@@ -190,7 +190,11 @@ def _get_regularizer(regularizer_parameter):
 
 
 def _build_optimizer(training):
-    optimizer = getattr(keras.optimizers, training.optimizer.optimizer)
+    if training.optimizer.optimizer == "SGD":
+        optimizer = getattr(keras.optimizers.legacy, training.optimizer.optimizer)
+    else:
+        optimizer = getattr(keras.optimizers, training.optimizer.optimizer)
     return optimizer(**training.optimizer.parameters)
 
 print(fix_loaded_type("Dense00023"))
+print('wtf')

@@ -5,6 +5,7 @@ from keras.layers import LSTM
 from minos.utils import save_sisy_model
 from minos.utils import load_sisy_model
 
+import os
 
 
 def ui():
@@ -41,9 +42,9 @@ def run_sisy_experiment(sisy_layout: list,
                         autoloop=True,
                         population_size=25,
                         epochs=50,
-                        devices=['/gpu:0', '/gpu:1'],
-                        n_jobs=1,
-                        optimizer='sgd',
+                        devices=['/cpu:0'],
+                        n_jobs=os.environ['N_JOBS'],
+                        optimizer='SGD',
                         loss='categorical_crossentropy',
                         metric='acc',
                         offspring=1,
@@ -138,7 +139,7 @@ def run_sisy_experiment(sisy_layout: list,
             layer_key = f'{layer_name}{i}'
             for key in list(layer.keys()):
 
-                layers_module  = importlib.import_module('keras.layers.core')
+                layers_module  = importlib.import_module('keras.layers')
                 custom_class = getattr(layers_module,layer_name)
                 if type(layer[key]) == list or type(layer[key]) == range:
                     register_custom_layer(
@@ -276,7 +277,7 @@ def run_sisy_experiment(sisy_layout: list,
         training=training,
         batch_iterator=batch_iterator,
         test_batch_iterator=test_batch_iterator,
-        environment=GpuEnvironment(devices=devices, n_jobs=n_jobs),
+        environment=GpuEnvironment( devices=devices, n_jobs=n_jobs),
         parameters=experiment_parameters,
         settings=experiment_settings
     )

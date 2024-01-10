@@ -5,7 +5,7 @@ Created on Feb 7, 2017
 '''
 import unittest
 
-from keras.layers.core import Dense
+from keras.layers import Dense
 
 from minos.experiment.experiment import ExperimentParameters, Experiment,\
     check_experiment_parameters, InvalidParametersException
